@@ -21,6 +21,7 @@ class Car:
         return f'{self.reg_number} {self.max_speed} {self.current_speed} {self.distance_travelled}'
     def accelerate(self, speed_change):
         self.current_speed += speed_change
+
         return self.current_speed
 
 car = Car("ABC-123", "142 km/h")
@@ -57,6 +58,7 @@ print(f"{car.distance_travelled} km")
 # Each car is made to drive for one hour. This is done with the drive method.
 # The race continues until one of the cars has advanced at least 10,000 kilometers. Finally, the properties of each car are printed out formatted into a clear table.
 import random
+
 class Car:
     def __init__(self, reg_number, max_speed, current_speed=0, distance_travelled=0):
         self.reg_number = reg_number
@@ -67,28 +69,46 @@ class Car:
         return f'{self.reg_number} {self.max_speed} {self.current_speed} {self.distance_travelled}'
     def accelerate(self, speed_change):
         self.current_speed += speed_change
-        return self.current_speed
+        if self.current_speed > self.max_speed:
+            self.current_speed = self.max_speed
+        elif self.current_speed < 0:
+            self.current_speed = 0
     def drive(self, hours):
-        self.distance_travelled=(hours*self.current_speed)+car.distance_travelled
-        return self.distance_travelled
+        self.distance_travelled += hours * self.current_speed
 
-cars = []
-for i in range(1, 11):
-    reg_number = f'ABC-{i}'
-    max_speed = random.randint(100, 200)
-    cars.append(Car(reg_number, max_speed))
+class Race:
+    def __init__(self, name, distance_km, cars):
+        self.name = name
+        self.distance_km = distance_km
+        self.cars = cars
+    def hour_passes(self):
+        # For each car, adjust speed randomly and update distance
+        for car in self.cars:
+            speed_change = random.randint(-10, 15)
+            car.accelerate(speed_change)
+            car.drive(1)
+    def print_status(self):
+        # Print out the status of each car in a formatted table
+        print(f"{'Registration Number':<19} | {'Max Speed':<13} | {'Current Speed':<13} | {'Distance Travelled':<17}")
+        print("-" * 70)
+        for car in self.cars:
+            print(f"{car.reg_number:<19} | {car.max_speed:<13} | {car.current_speed:<13} | {car.distance_travelled:<17}")
+    def race_finished(self):
+        # Check if any car has reached or exceeded the race distance
+        return any(car.distance_travelled >= self.distance_km for car in self.cars)
 
-while True:
-    for car in cars:
-        speed_change = random.randint(-10, 15)
-        car.accelerate(speed_change)
-        car.drive(1)
-    for car in cars:
-        if car.distance_travelled >= 10000:
-            break
-    if car.distance_travelled >= 10000:
-        break
-print("Results:")
-print("Registration Number | Maximum Speed | Current Speed | Distance Travelled")
-for car in cars:
-    print(f'{car.reg_number:19} | {car.max_speed:13} | {car.current_speed:13} | {car.distance_travelled:17}')
+cars = [Car(f"ABC-{i}", random.randint(100, 200)) for i in range(1, 11)]
+race = Race("Grand Demolition Derby", 8000, cars)
+
+hours_passed = 0
+while not race.race_finished():
+    race.hour_passes()
+    hours_passed += 1
+
+    if hours_passed % 10 == 0:
+        print(f"\nAfter {hours_passed} hours:")
+        race.print_status()
+
+print("\nFinal Race Status:")
+race.print_status()
+print(f"The race finished in {hours_passed} hours.")
